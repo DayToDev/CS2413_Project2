@@ -1,0 +1,17 @@
+﻿  Project2.cpp
+c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(330): warning C4101: 'tempMatrix': unreferenced local variable
+c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(123): error C2440: 'initializing': cannot convert from 'int' to 'std::vector<SparseRow<int>,std::allocator<_Ty>> *'
+          with
+          [
+              _Ty=SparseRow<int>
+          ]
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(123): note: Conversion from integral type to pointer type requires reinterpret_cast, C-style cast or function-style cast
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(119): note: while compiling class template member function 'SparseMatrix<int>::SparseMatrix(int,int,int)'
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(338): note: see reference to function template instantiation 'SparseMatrix<int>::SparseMatrix(int,int,int)' being compiled
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(338): note: see reference to class template instantiation 'SparseMatrix<int>' being compiled
+c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(159): warning C4018: '<': signed/unsigned mismatch
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(158): note: while compiling class template member function 'void SparseMatrix<int>::display(void)'
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(377): note: see reference to function template instantiation 'void SparseMatrix<int>::display(void)' being compiled
+c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(174): warning C4018: '<': signed/unsigned mismatch
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(168): note: while compiling class template member function 'void SparseMatrix<int>::displayMatrix(void)'
+  c:\users\da'von\documents\spring 2019\cs 2413 (data structures)\project2.cpp(380): note: see reference to function template instantiation 'void SparseMatrix<int>::displayMatrix(void)' being compiled
