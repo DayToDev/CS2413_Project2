@@ -88,7 +88,7 @@ protected:
 	int CV; //Common Value
 	int noRows; //Number of rows
 	int noCols; //Number of columns
-	vector <SparseRow<DT>>* myMatrix; //Pointer to created matrix
+	vector <SparseRow<DT> >* myMatrix; //Pointer to created matrix
 
 public:
 	SparseMatrix(); //Default constructor
@@ -96,7 +96,7 @@ public:
 	SparseMatrix<DT>* Transpose(); //Transposes a matrix diagonally
 	SparseMatrix<DT>* Multiply(SparseMatrix& M); //Multiplies two matrices and returns its resultant
 	SparseMatrix<DT>* Add(SparseMatrix& M); //Adds two matricies and returns its result
-	vector <SparseRow<DT>>* getMyMatrix();
+	vector <SparseRow<DT> >* getMyMatrix();
 	int getNoRows();
 	int getNoCols();
 	void setNoRows(int cols);
@@ -111,7 +111,7 @@ SparseMatrix<DT>::SparseMatrix()
 	CV = 0;
 	noRows = -1;
 	noCols = -1;
-	vector<SparseRow<DT>>* myMatrix (10);
+	vector<SparseRow <DT> >* myMatrix (10);
 }
 
 template <class DT>
@@ -120,11 +120,11 @@ SparseMatrix<DT>::SparseMatrix(int nr, int nc, int cv)
 	CV = cv;
 	noRows = nr;
 	noCols = nc;
-	vector<SparseRow<DT>>* myMatrix (10);
+	vector<SparseRow <DT> >* myMatrix (10);
 }
 
 template <class DT>
-vector<SparseRow<DT>>* SparseMatrix<DT>::getMyMatrix()
+vector<SparseRow<DT> >* SparseMatrix<DT>::getMyMatrix()
 {
 	return myMatrix;
 }
