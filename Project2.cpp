@@ -96,11 +96,15 @@ public:
 	SparseMatrix<DT>* Transpose(); //Transposes a matrix diagonally
 	SparseMatrix<DT>* Multiply(SparseMatrix& M); //Multiplies two matrices and returns its resultant
 	SparseMatrix<DT>* Add(SparseMatrix& M); //Adds two matricies and returns its result
+	SparseMatrix<DT>* operator+(SparseMatrix& M);
+	SparseMatrix<DT>* operator*(SparseMatrix& M);
+	SparseMatrix<DT>* operator!();
 	vector <SparseRow<DT> >* getMyMatrix();
 	int getNoRows();
 	int getNoCols();
 	void setNoRows(int cols);
 	void setNoCols(int cols);
+	void setSparseRow(int pos, int row, int col, DT& val);
 	void display(); //Display the sparse matrix
 	void displayMatrix(); //Display matrix in original format
 };
@@ -111,7 +115,7 @@ SparseMatrix<DT>::SparseMatrix()
 	CV = 0;
 	noRows = -1;
 	noCols = -1;
-	vector<SparseRow <DT> >* myMatrix (10);
+	myMatrix = new vector<SparseRow <DT> >();
 }
 
 template <class DT>
@@ -120,7 +124,7 @@ SparseMatrix<DT>::SparseMatrix(int nr, int nc, int cv)
 	CV = cv;
 	noRows = nr;
 	noCols = nc;
-	vector<SparseRow <DT> >* myMatrix (10);
+	myMatrix = new vector<SparseRow <DT> >();
 }
 
 template <class DT>
@@ -142,6 +146,13 @@ int SparseMatrix<DT>::getNoCols()
 }
 
 template <class DT>
+void SparseMatrix<DT>::setSparseRow(int pos, int row, int col, DT& val)
+{
+	SparseRow<DT>* tempSparse = new SparseRow<DT>*(row, col, val);
+	myMatrix[pos] = tempSparse;
+}
+
+template <class DT>
 void SparseMatrix<DT>::setNoRows(int rows)
 {
 	noRows = rows;
@@ -156,7 +167,7 @@ void SparseMatrix<DT>::setNoCols(int cols)
 template <class DT>
 void SparseMatrix<DT>::display()
 {
-	for (int i = 0; i < myMatrix->size(); i++)
+	for (unsigned int i = 0; i < myMatrix->size(); i++)
 	{
 		if (myMatrix->at(i).getVal() != CV)
 			myMatrix->at(i).display();
@@ -171,7 +182,7 @@ void SparseMatrix<DT>::displayMatrix()
 	{
 		for (int k = 0; k < noCols; k++)
 		{
-			for (int j = 0; j < myMatrix->size(); j++)
+			for (unsigned int j = 0; j < myMatrix->size(); j++)
 			{
 				if ((i == myMatrix->at(j).getRow()) && (k == myMatrix->at(j).getCol()))
 				{
@@ -191,54 +202,76 @@ void SparseMatrix<DT>::displayMatrix()
 }
 
 template <class DT>
+SparseMatrix<DT>* SparseMatrix<DT>::operator!()
+{
+	SparseMatrix<DT>* tempMatrix;
+	tempMatrix = this->Transpose();
+	return tempMatrix;
+}
+
+template <class DT>
 SparseMatrix<DT>* SparseMatrix<DT>::Transpose()
 {
 	SparseMatrix<DT>* temp = new SparseMatrix(noRows, noCols, CV);
 	SparseRow<DT>* tempRow;
 
-	for (int i = 0; i < myMatrix.size; i++)
+	for (unsigned int i = 0; i < myMatrix->size(); i++)
 	{
-		tempRow = new SparseRow(myMatrix[i].getCol(), myMatrix[i].getRow(), myMatrix[i].getVal());
-		(*temp).myMatrix[i] = *tempRow;
+		tempRow = new SparseRow<DT>(myMatrix->at(i).getCol(), myMatrix->at(i).getRow(), myMatrix->at(i).getVal());
+		(*temp).myMatrix->push_back(*tempRow);
 	}
 
 	return temp;
 }
 
 template <class DT>
+SparseMatrix<DT>* SparseMatrix<DT>::operator+(SparseMatrix& M)
+{
+	SparseMatrix<DT>* tempMatrix;
+	tempMatrix = Add(M);
+	return tempMatrix;
+}
+
+template <class DT>
 SparseMatrix<DT>* SparseMatrix<DT>::Add(SparseMatrix<DT>& M)
 {
-	SparseMatrix<DT>* temp = new SparseMatrix(noRows, noCols, CV, myMatrix.size + M.myMatrix.size);
-	int i = 0;
-	int j;
+	SparseMatrix<DT>* temp = new SparseMatrix<DT>(noRows, noCols, CV);
+	SparseRow<DT>* tempPtr;
+	unsigned int i = 0;
+	unsigned int j;
 	int valueToAdd;
+	int sum;
 	bool found;
 
-	bool* mArray = new bool[M.curSize];
-	for (int k = 0; k < M.curSize; k++) mArray[k] = false;
+	bool* mArray = new bool[M.myMatrix->size()];
+	for (unsigned int k = 0; k < M.myMatrix->size(); k++) mArray[k] = false;
 
-	while (i < myMatrix.size)
+	while (i < myMatrix->size())
 	{
 		j = 0;
 		found = false;
-		(*temp).myMatrix[(*temp).curSize].setRow(myMatrix[i].getRow());
-		(*temp).myMatrix[(*temp).curSize].setCol(myMatrix[i].getCol());
+		sum = 0;
 		valueToAdd = 0;
-		while ((j < M.curSize) && (!found))
+		while ((j < M.myMatrix->size()) && (!found))
 		{
-			if ((myMatrix[i].getRow() == M.myMatrix[j].getRow()) && (myMatrix[i].getCol() == M.myMatrix[j].getCol()))
+			if ((myMatrix->at(i).getRow() == M.myMatrix->at(j).getRow()) && (myMatrix->at(i).getCol() == M.myMatrix->at(j).getCol()))
 			{
 				found = true;
-				valueToAdd = M.myMatrix[j].getVal();
+				valueToAdd = M.myMatrix->at(j).getVal();
 				mArray[j] = true;
 			}
 			else j++;
 		}
-		(*temp).myMatrix[(*temp).curSize++].setVal(myMatrix[i].getVal() + valueToAdd);
+		if (found)
+		{
+			sum = (myMatrix->at(i).getVal() + valueToAdd);
+		}
+		tempPtr = new SparseRow<DT>(myMatrix->at(i).getRow(), myMatrix->at(i).getCol(), sum);
+		(*temp).myMatrix->push_back(*tempPtr);
 		i++;
 	}
 	//Copy new SparseRow objects from M
-	for (int k = 0; k < M.curSize; k++)
+	/*for (int k = 0; k < M.curSize; k++)
 	{
 		if (!mArray[k])
 		{
@@ -246,44 +279,52 @@ SparseMatrix<DT>* SparseMatrix<DT>::Add(SparseMatrix<DT>& M)
 			(*temp).myMatrix[(*temp).curSize].setCol(myMatrix[k].getCol());
 			(*temp).myMatrix[(*temp).curSize].setVal(myMatrix[k].getVal());
 		}
-	}
+	}*/
 	delete[] mArray;
 	return temp;
 }
 
 template <class DT>
+SparseMatrix<DT>* SparseMatrix<DT>::operator*(SparseMatrix& M)
+{
+	SparseMatrix<DT>* tempMatrix;
+	tempMatrix = Multiply(M);
+	return tempMatrix;
+}
+
+template <class DT>
 SparseMatrix<DT>* SparseMatrix<DT>::Multiply(SparseMatrix<DT>& M)
 {
-	SparseMatrix* temp = new SparseMatrix(noRows, noCols, CV, myMatrix.size + M.myMatrix.size);
-	SparseRow* tempPtr;
+	SparseMatrix<DT>* temp = new SparseMatrix<DT>(noRows, noCols, CV);
+	SparseRow<DT>* tempPtr;
 	int num1 = 0;
 	int num2 = 0;
 	int val1 = 0;
 	int val2 = 0;
-	int counter1 = 0;
-	int counter2 = 0;
+	unsigned int counter1 = 0;
+	unsigned int counter2 = 0;
 	for (int i = 0; i < noRows; i++)
 	{
 		for (int j = 0; j < M.noCols; j++)
 		{
 			for (int k = 0; k < M.noRows; k++) //Change to for loop
 			{
-				while (counter1 < myMatrix.size)
+				while (counter1 < myMatrix->size())
 				{
-					if (myMatrix[counter1].getRow() == i && myMatrix[counter1].getCol() == k)
+					if (myMatrix->at(counter1).getRow() == i && myMatrix->at(counter1).getCol() == k)
 					{
-						num1 = myMatrix[counter1].getVal();
-						counter1 = myMatrix.size; //Exit loop immediately
+						num1 = myMatrix->at(counter1).getVal();
+						counter1 = myMatrix->size(); //Exit loop immediately
 					}
 					counter1++;
 				}
 
-				while (counter2 < M.myMatrix.size)
+				while (counter2 < M.myMatrix->size())
 				{
-					if (M.myMatrix[counter2].getRow() == k && M.myMatrix[counter2].getCol() == j)
+					if (M.myMatrix->at(counter2).getRow() == k && M.myMatrix->at(counter2).getCol() == j)
 					{
-						num2 = M.myMatrix[counter2].getVal();
-						counter2 = M.myMatrix.size;
+						num2 = M.myMatrix->at(counter2).getVal();
+						counter2 = M.myMatrix->size();
 					}
 					counter2++;
 				}
@@ -304,8 +345,8 @@ SparseMatrix<DT>* SparseMatrix<DT>::Multiply(SparseMatrix<DT>& M)
 			}
 			if (val2 != 0)
 			{
-				tempPtr = new SparseRow(i, j, val2);
-				(*temp).myMatrix.push_back(*tempPtr);
+				tempPtr = new SparseRow<DT>(i, j, val2);
+				(*temp).myMatrix->push_back(*tempPtr);
 			}
 			//Reset for next loop
 			val1 = 0;
@@ -341,7 +382,7 @@ int main()
 		while (r < nr)
 		{
 			cin >> v;
-			if (v != 0)
+			if (v != cv)
 			{
 				tempRow = new SparseRow<int>(c, r, v);
 				(*firstMatrix).getMyMatrix()->push_back(*tempRow);
@@ -362,7 +403,7 @@ int main()
 		while (r < nr)
 		{
 			cin >> v;
-			if (v != 0)
+			if (v != cv)
 			{
 				tempRow2 = new SparseRow<int>(c, r, v);
 				(*secondMatrix).getMyMatrix()->push_back(*tempRow2);
@@ -385,22 +426,22 @@ int main()
 	cout << "Second one in normal matrix format" << endl;
 	(*secondMatrix).displayMatrix();
 
-	/*cout << "After Transpose first one in normal format" << endl;
-	tempMatrix = (*firstMatrix).Transpose();
+	cout << "After Transpose first one in normal format" << endl;
+	tempMatrix = !(*firstMatrix);
 
 	(*tempMatrix).displayMatrix();
 
 	cout << "After Transpose second one in normal format" << endl;
-	tempMatrix = (*secondMatrix).Transpose();
+	tempMatrix = !(*secondMatrix);
 	(*tempMatrix).displayMatrix();
 	
 	cout << "Multiplication of matrices in sparse matrix format: " << endl;
-	tempMatrix = (*secondMatrix).Multiply(*firstMatrix);
+	tempMatrix = (*secondMatrix) * (*firstMatrix);
 	(*tempMatrix).display();
 
 	cout << "Addition of matrices in sparse matrix format: " << endl;
-	tempMatrix = (*secondMatrix).Add(*firstMatrix);
+	tempMatrix = (*secondMatrix) + (*firstMatrix);
 	(*tempMatrix).display();
-	*/
+	
 return 0;	
 };
