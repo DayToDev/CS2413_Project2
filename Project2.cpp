@@ -1,6 +1,64 @@
 #include <iostream>
 #include <vector>
+
 using namespace std;
+
+template <class DT>
+class ExceptionAdd
+{
+	public:
+		ExceptionAdd();
+		void what();
+};
+
+template <class DT>
+ExceptionAdd<DT>::ExceptionAdd()
+{
+}
+
+template <class DT>
+void ExceptionAdd<DT>::what()
+{
+	cout << "Add Exception: Matrix1 rows & cols != Matrix2 rows & cols" << endl;
+}
+
+template <class DT>
+class ExceptionMultiply 
+{
+	public:
+		ExceptionMultiply();
+		void what();
+};
+
+template <class DT>
+ExceptionMultiply<DT>::ExceptionMultiply()
+{
+}
+
+template <class DT>
+void ExceptionMultiply<DT>::what()
+{
+	cout << "Multiply Exception: Matrix1 cols != Matrix2 rows" << endl;
+}
+
+template <class DT>
+class ExceptionCV
+{
+	public:
+		ExceptionCV();
+		void what();
+};
+
+template <class DT>
+ExceptionCV<DT>::ExceptionCV()
+{
+}
+
+template <class DT>
+void ExceptionCV<DT>::what()
+{
+	cout << "CV Exception: Matrix1 CV != Matrix2 CV" << endl;
+}
 
 template <class DT>
 class SparseRow
@@ -109,8 +167,10 @@ public:
 	vector <SparseRow<DT> >* getMyMatrix();
 	int getNoRows();
 	int getNoCols();
+	int getCV();
 	void setNoRows(int cols);
 	void setNoCols(int cols);
+	void setCV(int newCV);
 	void setSparseRow(int pos, int row, int col, DT& val);
 	void display(); //Display the sparse matrix
 	void displayMatrix(); //Display matrix in original format
@@ -158,6 +218,12 @@ int SparseMatrix<DT>::getNoCols()
 }
 
 template <class DT>
+int SparseMatrix<DT>::getCV()
+{
+	return CV;
+}
+
+template <class DT>
 void SparseMatrix<DT>::setSparseRow(int pos, int row, int col, DT& val)
 {
 	SparseRow<DT>* tempSparse = new SparseRow<DT>*(row, col, val);
@@ -174,6 +240,12 @@ template <class DT>
 void SparseMatrix<DT>::setNoCols(int cols)
 {
 	noCols = cols;
+}
+
+template <class DT>
+void SparseMatrix<DT>::setCV(int newCV)
+{
+	CV = newCV;
 }
 
 template <class DT>
@@ -382,7 +454,7 @@ SparseMatrix<DT>* SparseMatrix<DT>::Multiply(SparseMatrix<DT>& M)
 
 int main()
 {
-	int nr, nc, cv, size;
+	int nr, nc, cv;
 	int v;
 	int c = 0;
 	int r = 0;
@@ -394,7 +466,7 @@ int main()
 	SparseRow<int>* tempRow;
 	SparseRow<int>* tempRow2;
 
-	cin >> nr >> nc >> cv >> size; //Reads in parameters for first Matrix
+	cin >> nr >> nc >> cv; //Reads in parameters for first Matrix
 	firstMatrix = new SparseMatrix<int>(nr, nc, cv);
 	while (c < nc)
 	{
@@ -412,7 +484,7 @@ int main()
 		c++;
 	}
 	
-	cin >> nr >> nc >> cv >> size; //Reads in parameters for second Matrix
+	cin >> nr >> nc >> cv; //Reads in parameters for second Matrix
 	secondMatrix = new SparseMatrix<int>(nr, nc, cv);
 
 	r = 0;
@@ -454,12 +526,39 @@ int main()
 	(*tempMatrix).displayMatrix();
 	
 	cout << "Multiplication of matrices in sparse matrix format: " << endl;
-	tempMatrix = (*secondMatrix) * (*firstMatrix);
-	cout << *tempMatrix;
+	try
+	{ 
+		if (secondMatrix->getNoCols() != firstMatrix->getNoRows())throw ExceptionMultiply<int>();
+
+		if (secondMatrix->getCV() != firstMatrix->getCV())throw ExceptionCV<int>();
+		tempMatrix = (*secondMatrix) * (*firstMatrix);
+		cout << *tempMatrix;
+	}
+	catch (ExceptionMultiply<int> e)
+	{
+		e.what();
+	}
+	catch (ExceptionCV<int> e)
+	{
+		e.what();
+	}
 
 	cout << "Addition of matrices in sparse matrix format: " << endl;
-	tempMatrix = (*secondMatrix) + (*firstMatrix);
-	cout << *tempMatrix;
+	try
+	{
+		if (secondMatrix->getNoCols() != firstMatrix->getNoCols() || secondMatrix->getNoRows() != firstMatrix->getNoRows())throw ExceptionAdd<int>();
+		if (secondMatrix->getCV() != firstMatrix->getCV())throw ExceptionCV<int>();
+		tempMatrix = (*secondMatrix) + (*firstMatrix);
+		cout << *tempMatrix;
+	}
+	catch (ExceptionAdd<int> e)
+	{
+		e.what();
+	}
+	catch (ExceptionCV<int> e)
+	{
+		e.what();
+	}
 	
 return 0;	
 };
