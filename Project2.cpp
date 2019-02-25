@@ -13,6 +13,7 @@ protected:
 public:
 	SparseRow(); //Default constructor
 	SparseRow(int row, int col, DT& value);
+	virtual ~SparseRow();
 	void display(); //Prints Row#, Column#, Value
 	int getRow(); 
 	int getCol();
@@ -37,6 +38,11 @@ SparseRow<DT>::SparseRow(int row, int col, DT& val)
 	r = row;
 	c = col;
 	v = val;
+}
+
+template <class DT>
+SparseRow<DT>::~SparseRow()
+{
 }
 
 template <class DT>
@@ -93,6 +99,7 @@ protected:
 public:
 	SparseMatrix(); //Default constructor
 	SparseMatrix(int nr, int nc, int cv);
+	virtual ~SparseMatrix();
 	SparseMatrix<DT>* Transpose(); //Transposes a matrix diagonally
 	SparseMatrix<DT>* Multiply(SparseMatrix& M); //Multiplies two matrices and returns its resultant
 	SparseMatrix<DT>* Add(SparseMatrix& M); //Adds two matricies and returns its result
@@ -107,6 +114,7 @@ public:
 	void setSparseRow(int pos, int row, int col, DT& val);
 	void display(); //Display the sparse matrix
 	void displayMatrix(); //Display matrix in original format
+	friend ostream& operator<<(ostream& output, SparseMatrix<DT>* matrix);
 };
 
 template <class DT>
@@ -127,6 +135,10 @@ SparseMatrix<DT>::SparseMatrix(int nr, int nc, int cv)
 	myMatrix = new vector<SparseRow <DT> >();
 }
 
+template <class DT>
+SparseMatrix<DT>::~SparseMatrix()
+{
+}
 template <class DT>
 vector<SparseRow<DT> >* SparseMatrix<DT>::getMyMatrix()
 {
@@ -162,6 +174,13 @@ template <class DT>
 void SparseMatrix<DT>::setNoCols(int cols)
 {
 	noCols = cols;
+}
+
+template <class DT>
+ostream& operator<<(ostream& output, SparseMatrix<DT> matrix)
+{
+	matrix.display();
+	return output;
 }
 
 template <class DT>
@@ -415,20 +434,19 @@ int main()
 	}
 
 	cout << "First one in sparse matrix format" << endl;
-	(*firstMatrix).display();
+	cout << *firstMatrix;
 
 	cout << "First one in normal matrix format" << endl;
 	(*firstMatrix).displayMatrix();
 
 	cout << "Second one in sparse matrix format" << endl;
-	(*secondMatrix).display();
+	cout << *secondMatrix;
 
 	cout << "Second one in normal matrix format" << endl;
 	(*secondMatrix).displayMatrix();
 
 	cout << "After Transpose first one in normal format" << endl;
 	tempMatrix = !(*firstMatrix);
-
 	(*tempMatrix).displayMatrix();
 
 	cout << "After Transpose second one in normal format" << endl;
@@ -437,11 +455,11 @@ int main()
 	
 	cout << "Multiplication of matrices in sparse matrix format: " << endl;
 	tempMatrix = (*secondMatrix) * (*firstMatrix);
-	(*tempMatrix).display();
+	cout << *tempMatrix;
 
 	cout << "Addition of matrices in sparse matrix format: " << endl;
 	tempMatrix = (*secondMatrix) + (*firstMatrix);
-	(*tempMatrix).display();
+	cout << *tempMatrix;
 	
 return 0;	
 };
